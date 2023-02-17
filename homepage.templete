@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="header">
+        <a href="#" class="logo"> Performance Viewer </a>
+        <div id="menu-btn" class="fas fa-bars"></div>
+
+    </header>
+
+    <section class="home" id="home">
+        <div class="image">
+            <img src="images/home-img.png" alt="">
+        </div>
+
+        <div class="content">
+            <h3>Performance Viewer</h3>
+            <p>display all performance pictures </p>
+        </div>
+
+    </section>
+
+    <section class="icons-container">
+
+        <!-- add here -->
+
+    </section>
+
+</body>
+</html>
