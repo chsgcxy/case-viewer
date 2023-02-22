@@ -142,8 +142,8 @@ section:nth-child(even) {
 }
 
 .home .case {
-    width: 1024px;
-    height: 768px;
+    width: 1600px;
+    height: 900px;
     margin: auto;
     display: flex;
     justify-content: center;
@@ -176,7 +176,7 @@ section:nth-child(even) {
     color: var(--black);
     line-height: 1.8;
     text-transform: lowercase;
-    margin-left: 10rem;
+    margin-left: 1rem;
     /* text-shadow: var(--text-shadow); */
 }
 
