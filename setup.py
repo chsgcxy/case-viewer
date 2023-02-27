@@ -18,11 +18,13 @@ def setup_detailpage_name(lines:list, args):
 
 def setup_detailpage_image(lines:list, args):
     if args:
-        img = '../{}'.format(args[0])
-    else:
-        img = 'images/home-img.png'
-    img_string = r'''<img src="{}" alt="">'''.format(img)
-    lines.append(img_string + '\n')
+        img = '{}'.format(args[0])
+        img_string = r'''<img src="{}" alt="">'''.format(img)
+        lines.append(img_string + '\n')
+    # else:
+    #     img = 'images/home-img.png'
+    # img_string = r'''<img src="{}" alt="">'''.format(img)
+    # lines.append(img_string + '\n')
 
 def setup_detailpage_notes(lines:list, args):
     name = args[0]
@@ -56,8 +58,9 @@ def setup_detailpage_sheet(lines:list, args):
     lines.append(r'''</table>''' + '\n')
 
 def setup_detailpage_cases(lines:list, args):
-    case_name = args[0]
-    case_string = r'''<input type="submit0" value="{}" class="btn" onclick="window.open('./{}.html')">'''.format(case_name, case_name)
+    case_dir = args[0]
+    case_name = args[1]
+    case_string = r'''<input type="submit0" value="{}" class="btn" onclick="window.open('./{}.html')">'''.format(case_dir, case_name)
     lines.append(case_string + '\n')
 
 def setup_casepage_name(lines:list, args):
@@ -69,7 +72,7 @@ def setup_casepage_img(lines:list, args):
     img_name = args[0]
     img_string = r'''<div class="content"> <h2>{}</h2> </div>'''.format(img_name)
     lines.append(img_string + '\n')
-    img_string = r'''<div class="case"> <img src="../{}" alt="" /> </div>'''.format(img_name)
+    img_string = r'''<div class="case"> <img src="{}" alt="" /> </div>'''.format(img_name)
     lines.append(img_string + '\n')
 
 def init_setup_table(templete_name, page_name, position, setup_function, *args):
@@ -96,9 +99,10 @@ def setup_page(type_name:str, page_name:str, descs:list):
             if pos in line:
                 func(new_lines, args)
 
-    new_page = os.path.join(script_dir, 'out_pages/{}.html'.format(page_name))
-    with open(new_page, 'w') as filp:
+    fpath = os.path.join(out_path, '{}.html'.format(page_name))
+    with open(fpath, 'w') as filp:
         filp.writelines(new_lines)
+    os.system('chmod 775 ' + fpath)
 
 # run from here
 # get detail page name
@@ -114,6 +118,9 @@ for f in flist:
 setup_list = []
 setup_dict = {}
 
+out_path = os.path.abspath(os.path.join(script_dir, 'out_pages'))
+os.system('rm -f ' + out_path + '*.html')
+
 # register setup pass
 init_setup_table('homepage', 'homepage', '<!-- add here -->', setup_homepage_items)
 for detail_page in detail_page_names:
@@ -124,18 +131,28 @@ for detail_page in detail_page_names:
 
     default_img = True
     setup_sheet = True
-    for df in detail_files:        
+    for df in detail_files:
         case_dir = os.path.join(detail_dir, df)
+        # recusive foreach case dir
         if os.path.isdir(case_dir):
-            case_name = '{}_{}'.format(detail_page, df)
-            init_setup_table('detailpage', detail_page, '<!-- detail cases -->', setup_detailpage_cases, case_name)
-            init_setup_table('casepage', case_name, '<!-- case name -->', setup_casepage_name, df)
-            case_imgs = os.listdir(case_dir)
-            for img in case_imgs:
-                suffix = img.split('.')[-1]
-                if suffix.upper() in ('PNG', 'SVG', 'JPG'):
-                    img_path = os.path.join(detail_page, df, img)
-                    init_setup_table('casepage', case_name, '<!-- case img -->', setup_casepage_img, img_path)
+            case_added = []
+            for root, subdir, casefiles in os.walk(case_dir):
+                for cf in casefiles:
+                    suffix = cf.split('.')[-1]
+                    if suffix.upper() in ('PNG', 'SVG', 'JPG'):
+                        # add one case page entry to detailpage
+                        case_realpath = os.path.relpath(root, script_dir)
+                        case_name = case_realpath.replace('/', '_')
+                        if case_name not in case_added:
+                            init_setup_table('detailpage', detail_page, '<!-- detail cases -->', setup_detailpage_cases, case_realpath, case_name)
+                            init_setup_table('casepage', case_name, '<!-- case name -->', setup_casepage_name, case_realpath)
+                            case_added.append(case_name)
+
+                        # add one case page
+                        img_path = os.path.abspath(os.path.join(root, cf))
+                        init_setup_table('casepage', case_name, '<!-- case img -->', setup_casepage_img, img_path)
+
+        # if has image or sheet, show in detail page
         if os.path.isfile(case_dir):
             suffix = df.split('.')[-1]
             if setup_sheet and suffix == 'sheet':
@@ -143,7 +160,9 @@ for detail_page in detail_page_names:
                 init_setup_table('detailpage', detail_page, '<!-- detail sheet -->', setup_detailpage_sheet, case_dir)
             if default_img and suffix.upper() in ('PNG', 'SVG', 'JPG'):
                 default_img = False
-                init_setup_table('detailpage', detail_page, '<!-- detail image -->', setup_detailpage_image, os.path.join(detail_page, df))
+                init_setup_table('detailpage', detail_page, '<!-- detail image -->', setup_detailpage_image, os.path.abspath(case_dir))                
+
+    # use default image for detail page
     if default_img:
         init_setup_table('detailpage', detail_page, '<!-- detail image -->', setup_detailpage_image)
 
