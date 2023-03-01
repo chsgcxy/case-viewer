@@ -16,9 +16,9 @@
     </header>
 
     <section class="home" id="home">
-        <div class="image">
+        <!-- <div class="image">
             <img src="images/home-img.png" alt="">
-        </div>
+        </div> -->
 
         <div class="content">
             <h3>Performance Viewer</h3>

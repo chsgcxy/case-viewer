@@ -4,13 +4,13 @@ import sys
 import os
 
 def setup_homepage_items(lines:list, args):
-    for item in detail_pages:
-        item_string = r'''<div class="icons" onclick="window.open('./{}.html')">'''.format(item)
-        lines.append(item_string + '\n')
-        item_string = r'''<i class="fas fa-user-md"></i> <h3>{}</h3> <p>click for details</p>'''.format(item)
-        lines.append(item_string + '\n')
-        item_string = r'''</div>'''
-        lines.append(item_string + '\n\n')
+    item = args[0]
+    item_string = r'''<div class="icons" onclick="window.open('./{}.html', target='_self')">'''.format(item)
+    lines.append(item_string + '\n')
+    item_string = r'''<i class="fas fa-user-md"></i> <h3>{}</h3> <p>click for details</p>'''.format(item)
+    lines.append(item_string + '\n')
+    item_string = r'''</div>'''
+    lines.append(item_string + '\n\n')
 
 def setup_detailpage_name(lines:list, args):
     name_string = r'''<a href="#" class="logo"> {} </a>'''.format(args[0])
@@ -58,14 +58,14 @@ def setup_detailpage_sheet(lines:list, args):
     lines.append(r'''</table>''' + '\n')
 
 def setup_detailpage_cases(lines:list, args):
-    case_path = args[0]
-    case_name = args[1]
-    case_string = r'''<input type="submit0" value="{}" class="btn" onclick="window.open('{}.html', target='_self')">'''.format(case_path, case_name)
+    child_name = args[0]
+    child_path = args[1]
+    case_string = r'''<input type="submit0" value="{}" class="btn" onclick="window.open('{}.html', target='_self')">'''.format(child_name, child_path)
     lines.append(case_string + '\n')
 
 def setup_casepage_name(lines:list, args):
-    case_name = args[0]
-    case_string = r'''<a href="#" class="logo"> {} </a>'''.format(case_name)
+    child_name = args[0]
+    case_string = r'''<a href="#" class="logo"> {} </a>'''.format(child_name)
     lines.append(case_string + '\n')
 
 def setup_casepage_img(lines:list, args):
@@ -74,6 +74,13 @@ def setup_casepage_img(lines:list, args):
     lines.append(img_string + '\n')
     img_string = r'''<div class="case"> <img src="{}" alt="" /> </div>'''.format(img_name)
     lines.append(img_string + '\n')
+
+def setup_css(lines:list, args):
+    css_string = r'''<link rel="stylesheet" href="{}">'''.format(args[0])
+    lines.append(css_string + '\n')
+
+setup_list = []
+setup_dict = {}
 
 def init_setup_table(templete_name, page_name, position, setup_function, *args):
     if templete_name not in setup_list:
@@ -106,91 +113,92 @@ def setup_page(type_name:str, page_name:str, descs:list):
 
 # run from here
 # get detail page name
-script_dir = os.path.dirname(__file__)
-flist = os.listdir(script_dir)
-dir_filter = ('out_pages', '.git')
-detail_pages = []
-for f in flist:
-    fpath = os.path.join(script_dir, f)
-    if os.path.isdir(fpath) and f not in dir_filter:
-        detail_pages.append(f)
-
-setup_list = []
-setup_dict = {}
-
-flush_filter = ('style.css', 'images')
+script_dir = os.path.dirname(os.path.abspath(__file__))
 output_dir = os.path.abspath(os.path.join(script_dir, 'out_pages'))
+dir_filter = ('out_pages', '.git')
+flush_filter = ('style.css', 'images')
+css_path = os.path.join(output_dir, 'style.css')
+
+# flush the output dir
 for f in os.listdir(output_dir):
     if f not in flush_filter:
         flush_cmd = 'rm -rf {}'.format(os.path.join(output_dir, f))
         os.system(flush_cmd)
 
-# register setup pass
-init_setup_table('homepage', os.path.join(output_dir, 'homepage'), '<!-- add here -->', setup_homepage_items)
+# register other pages
+for root, subdirs, casefiles in os.walk(script_dir):
+    relpath = os.path.relpath(root, script_dir)
+    relpath_header = relpath.split('/')[0]
+    if relpath_header in dir_filter:
+        continue
 
-for detail_page in detail_pages:
-    print('deal with ', detail_page)
-    detail_dir = os.path.abspath(os.path.join(script_dir, detail_page))
-    default_img = True
-    setup_sheet = True
-    created_pages = []
-    for detail_item in os.listdir(detail_dir):
-        case_path = os.path.join(detail_dir, detail_item)
-        print('casepath:', case_path)
-        # recusive foreach case dir
-        if os.path.isdir(case_path):
-            for root, subdir, casefiles in os.walk(case_path):
-                print('root:', root)
-                print('subdir:', subdir)
-                print('casefiles:', casefiles)
-                child_name = os.path.relpath(root, script_dir)
-                father_name = os.path.dirname(child_name)
-                child_path = os.path.join(output_dir, child_name)
-                father_path = os.path.join(output_dir, father_name)
+    # added as dir
+    print('deal with root:', root)
+    if len(subdirs) > 0:
+        for subdir in subdirs:
+            if relpath_header == '.' and subdir in dir_filter:
+                continue
+            dir_name = os.path.relpath(os.path.join(root, subdir), script_dir)
+            dir_path = os.path.join(output_dir, dir_name)
+            os.system('mkdir -p ' + dir_path)
+            print('creat output dir:', dir_path)
 
-                if father_path not in created_pages:
-                    init_setup_table('detailpage', father_path, '<!-- detail name -->', setup_detailpage_name, father_name)
-                    init_setup_table('detailpage', father_path, '<!-- detail notes -->', setup_detailpage_notes, father_name)
-                    created_pages.append(father_path)
-                    print('creat dir ', father_path)
-                    os.system('mkdir -p ' + father_path)
-                # dir has children
-                # if not created father page, creat it
-                # add child to father page
-                if len(subdir) > 0:
-                    init_setup_table('detailpage', father_path, '<!-- detail cases -->', setup_detailpage_cases, child_name, child_path)
-                    # add child page
-                    init_setup_table('detailpage', child_path, '<!-- detail name -->', setup_detailpage_name, child_name)
-                    init_setup_table('detailpage', child_path, '<!-- detail notes -->', setup_detailpage_notes, child_name)
-                    os.system('mkdir -p ' + child_path)
-                    print('creat dir ', child_path)
+            is_leaf = True
+            for p in os.listdir(os.path.join(script_dir, dir_name)):
+                if os.path.isdir(os.path.join(script_dir, dir_name, p)):
+                    is_leaf = False
+                    break
 
-                # leaf node
-                elif len(subdir) == 0 and len(casefiles) > 0:
-                    init_setup_table('detailpage', father_path, '<!-- detail cases -->', setup_detailpage_cases, child_name, child_path)
-                    init_setup_table('casepage', child_path, '<!-- case name -->', setup_casepage_name, child_name)
-                    for cf in casefiles:
-                        suffix = cf.split('.')[-1]
-                        if suffix.upper() in ('PNG', 'SVG', 'JPG'):
-                            # add one case page
-                            img_path = os.path.abspath(os.path.join(root, cf))
-                            init_setup_table('casepage', child_path, '<!-- case img -->', setup_casepage_img, img_path)
-                else:
-                    print('warning: ignore block dir')
+            if is_leaf:
+                print('is leaf, continue')
+                continue
 
-        # if has image or sheet, show in detail page
-        if os.path.isfile(case_path):
-            suffix = detail_item.split('.')[-1]
+            # print('creat detail page:', dir_path)
+            init_setup_table('detailpage', dir_path, '<!-- detail name -->', setup_detailpage_name, dir_name)
+            init_setup_table('detailpage', dir_path, '<!-- detail notes -->', setup_detailpage_notes, dir_name)
+            init_setup_table('detailpage', dir_path, '<!-- add css -->', setup_css, css_path)
+
+            # has detailpage father
+            if relpath_header != '.':
+                father_path = os.path.join(output_dir, relpath)
+                dir_base, dir_relname = os.path.split(dir_name)
+                init_setup_table('detailpage', father_path, '<!-- detail cases -->', setup_detailpage_cases, dir_relname, dir_path)
+                # print('add a dir to father, dir name:', dir_path)
+            # has homepage father
+            else:
+                init_setup_table('homepage', os.path.join(output_dir, 'homepage'), '<!-- add here -->', setup_homepage_items, dir_name)
+
+        # support sheet file
+        setup_sheet = True
+        for cf in casefiles:
+            suffix = cf.split('.')[-1]
             if setup_sheet and suffix == 'sheet':
                 setup_sheet = False
-                init_setup_table('detailpage', os.path.join(output_dir, detail_page), '<!-- detail sheet -->', setup_detailpage_sheet, case_path)
-            if default_img and suffix.upper() in ('PNG', 'SVG', 'JPG'):
-                default_img = False
-                init_setup_table('detailpage', os.path.join(output_dir, detail_page), '<!-- detail image -->', setup_detailpage_image, os.path.abspath(case_path))                
+                sheet_path = os.path.abspath(os.path.join(root, cf))
+                father_name = os.path.relpath(root, script_dir)
+                father_path = os.path.join(output_dir, father_name)
+                init_setup_table('detailpage', father_path, '<!-- detail sheet -->', setup_detailpage_sheet, sheet_path)
+                print('add sheet from:', sheet_path, ' to:', father_path)
 
-    # use default image for detail page
-    if default_img:
-        init_setup_table('detailpage', os.path.join(output_dir, detail_page), '<!-- detail image -->', setup_detailpage_image)
+    # added as case
+    if len(subdirs) == 0 and len(casefiles) > 0:
+        child_name = os.path.relpath(root, script_dir)
+        child_base, child_relname = os.path.split(child_name)
+        child_path = os.path.join(output_dir, child_name)
+        father_name = os.path.dirname(child_name)
+        father_path = os.path.join(output_dir, father_name)
+
+        # print('add a case to father, case name:', child_path)
+        init_setup_table('detailpage', father_path, '<!-- detail cases -->', setup_detailpage_cases, child_relname, child_path)
+        init_setup_table('casepage', child_path, '<!-- case name -->', setup_casepage_name, child_name)
+        init_setup_table('casepage', child_path, '<!-- add css -->', setup_css, css_path)
+
+        for cf in casefiles:
+            suffix = cf.split('.')[-1]
+            if suffix.upper() in ('PNG', 'SVG', 'JPG'):
+                # add one case page
+                img_path = os.path.abspath(os.path.join(root, cf))
+                init_setup_table('casepage', child_path, '<!-- case img -->', setup_casepage_img, img_path)
 
 # setup page
 for templete in setup_list:
