@@ -1,3 +1,0 @@
-case name | case status | case detail
-case1 | ok | this is a pass example
-case2 | fail | this is a fail example
