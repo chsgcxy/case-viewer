@@ -145,10 +145,10 @@ section:nth-child(even) {
 }
 
 .home .case {
-    /* width: 1600px;
-    height: 900px; */
+    width: 1024px;
+    height: 768px;
     margin: auto;
-    display: block;
+    display: flex;
     justify-content: center;
     align-items: center;
     border-radius: 8px;
@@ -167,7 +167,9 @@ section:nth-child(even) {
 }
 
 .home .image img {
-    width: 100%;
+    /* width: 100%; */
+    margin: auto;
+    display: flex;
 }
 
 .home .content {

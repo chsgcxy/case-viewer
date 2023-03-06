@@ -98,10 +98,11 @@ def setup_casepage_name(lines:list, args):
     lines.append(case_string + '\n')
 
 def setup_casepage_img(lines:list, args):
-    img_name = args[0]
+    img_path = args[0]
+    img_name = args[1]
     img_string = r'''<div class="content"> <h2>{}</h2> </div>'''.format(img_name)
     lines.append(img_string + '\n')
-    img_string = r'''<div class="case"> <img src="{}" alt="" /> </div>'''.format(img_name)
+    img_string = r'''<div class="case"> <img src="{}" alt="" /> </div>'''.format(img_path)
     lines.append(img_string + '\n')
 
 def setup_css(lines:list, args):
@@ -235,7 +236,7 @@ for root, subdirs, casefiles in os.walk(script_dir):
             if suffix.upper() in img_types:
                 # add one case page
                 img_path = os.path.abspath(os.path.join(root, cf))
-                init_setup_table('casepage', child_path, '<!-- case img -->', setup_casepage_img, img_path)
+                init_setup_table('casepage', child_path, '<!-- case img -->', setup_casepage_img, img_path, cf)
 
 # setup page
 for templete in setup_list:
