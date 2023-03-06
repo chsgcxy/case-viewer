@@ -23,11 +23,10 @@
         </div>
 
         <!-- detail image -->
-    
+
     </section>
 
     <section class="book" id="book">
-        <h1 class="heading"> <span>case</span> table </h1>
         <!-- detail sheet -->
 
     </section>
@@ -35,11 +34,10 @@
     <section class="about" id="about">
         <h1 class="heading"> <span>case</span> list </h1>
         <div class="row">
-                <!-- detail cases -->
+            <!-- detail cases -->
 
         </div>
-
     </section>
-    
+
 </body>
 </html>

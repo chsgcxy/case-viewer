@@ -145,10 +145,10 @@ section:nth-child(even) {
 }
 
 .home .case {
-    width: 1600px;
-    height: 900px;
+    /* width: 1600px;
+    height: 900px; */
     margin: auto;
-    display: flex;
+    display: block;
     justify-content: center;
     align-items: center;
     border-radius: 8px;
@@ -325,6 +325,7 @@ section:nth-child(even) {
 .book .table th {
     background: var(--light-color);
     font-size: 1.5rem;
+    padding: .5rem .5rem .5rem .5rem;
     /* border: var(--border); */
 }
 
