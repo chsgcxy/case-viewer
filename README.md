@@ -1,5 +1,7 @@
 # performance case viewer
 
+[TOC]
+
 **Performance case viewer** is a static web page generation tool for test result display. It can generate beautiful static web pages according to the file directory structure where the tool is located.
 
 It has the following characteristics:
@@ -11,7 +13,15 @@ It has the following characteristics:
 
 ## core mechanism
 
-The core mechanism of the tool is to retrieve all the folders where the tool is located through a script, and dynamically generate all web pages by referencing the html template. The hierarchical relationship of the web page corresponding to the hierarchical relationship of the directory. The tools directory is a three-level directory structure. The folder under the directory where the script is located is called the test class, which is the first-level directory structure. The folder under each test class is called a test item, which is the second-level directory structure. Several test pictures can be placed under the folder of each test item, which is the third-level directory structure.
+The core mechanism of the tool is to retrieve all the folders where the tool is located through a script, and dynamically generate all web pages by referencing the html template. The hierarchical relationship of the web page corresponding to the hierarchical relationship of the directory.
+
+Theoretically, the number of directory levels supported by the tool is unlimited, but there are the following rules:
+
+- If there is nothing in the directory, the directory will not be displayed
+- If a directory contains subdirectories, the directory will be considered as a subclass page rather than a specific case page
+- If a directory contains not only subdirectories, but also image files, these image files will be considered as descriptions of subclass pages and will be displayed in the page
+- If a directory contains not only subdirectories, but also excel or sheet files, these files will be displayed in the form of tables on the page
+- If there is no subdirectory under a directory, the directory will be considered as a case page
 
 ## how to add case
 
@@ -48,7 +58,7 @@ haochen@DESKTOP-7GLE6OA:~/workspace/case-viewer/cpu/case1$ cp xxxx 123.png
 ### add a picture for test class
 
 As the following operation, a picture named example.png is placed in the example test class directory.
-This picture will be automatically referenced as the theme picture of the test class. Only **png,jpg,svg** are supported.
+This picture will be automatically referenced as the theme picture of the test class. Only **png,jpg,svg,jpeg** are supported.
 
 ```shell
 haochen@DESKTOP-7GLE6OA:~/workspace/case-viewer$ cd example/
@@ -57,6 +67,8 @@ case1  case2  example.png  example.sheet
 ```
 
 ### add a sheet for test class
+
+The tool supports two types of tables, text file with suffix **sheet** and excel file with suffix **xlsx** are both supported
 
 ```shell
 haochen@DESKTOP-7GLE6OA:~/workspace/case-viewer$ cd example/
