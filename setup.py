@@ -18,9 +18,11 @@ def setup_detailpage_name(lines:list, args):
 
 def setup_detailpage_image(lines:list, args):
     if args:
+        lines.append(r'''<div class="image">''' + '\n')
         img = '{}'.format(args[0])
         img_string = r'''<img src="{}" alt="">'''.format(img)
         lines.append(img_string + '\n')
+        lines.append(r'''</div>''' + '\n')
     # else:
     #     img = 'images/home-img.png'
     # img_string = r'''<img src="{}" alt="">'''.format(img)
@@ -118,6 +120,7 @@ output_dir = os.path.abspath(os.path.join(script_dir, 'out_pages'))
 dir_filter = ('out_pages', '.git')
 flush_filter = ('style.css', 'images')
 css_path = os.path.join(output_dir, 'style.css')
+imgtype_list = ('PNG', 'SVG', 'JPG', 'JPEG')
 
 # flush the output dir
 for f in os.listdir(output_dir):
@@ -133,7 +136,7 @@ for root, subdirs, casefiles in os.walk(script_dir):
         continue
 
     # added as dir
-    print('deal with root:', root)
+    # print('deal with root:', root)
     if len(subdirs) > 0:
         for subdir in subdirs:
             if relpath_header == '.' and subdir in dir_filter:
@@ -141,7 +144,7 @@ for root, subdirs, casefiles in os.walk(script_dir):
             dir_name = os.path.relpath(os.path.join(root, subdir), script_dir)
             dir_path = os.path.join(output_dir, dir_name)
             os.system('mkdir -p ' + dir_path)
-            print('creat output dir:', dir_path)
+            # print('creat output dir:', dir_path)
 
             is_leaf = True
             for p in os.listdir(os.path.join(script_dir, dir_name)):
@@ -150,7 +153,7 @@ for root, subdirs, casefiles in os.walk(script_dir):
                     break
 
             if is_leaf:
-                print('is leaf, continue')
+                # print('is leaf, continue')
                 continue
 
             # print('creat detail page:', dir_path)
@@ -178,7 +181,13 @@ for root, subdirs, casefiles in os.walk(script_dir):
                 father_name = os.path.relpath(root, script_dir)
                 father_path = os.path.join(output_dir, father_name)
                 init_setup_table('detailpage', father_path, '<!-- detail sheet -->', setup_detailpage_sheet, sheet_path)
-                print('add sheet from:', sheet_path, ' to:', father_path)
+                # print('add sheet from:', sheet_path, ' to:', father_path)
+            if suffix.upper() in imgtype_list:
+                img_path = os.path.abspath(os.path.join(root, cf))
+                father_name = os.path.relpath(root, script_dir)
+                father_path = os.path.join(output_dir, father_name)
+                init_setup_table('detailpage', father_path, '<!-- detail image -->', setup_detailpage_image, img_path)
+                # print('add title img to:', father_path)
 
     # added as case
     if len(subdirs) == 0 and len(casefiles) > 0:
@@ -195,7 +204,7 @@ for root, subdirs, casefiles in os.walk(script_dir):
 
         for cf in casefiles:
             suffix = cf.split('.')[-1]
-            if suffix.upper() in ('PNG', 'SVG', 'JPG'):
+            if suffix.upper() in imgtype_list:
                 # add one case page
                 img_path = os.path.abspath(os.path.join(root, cf))
                 init_setup_table('casepage', child_path, '<!-- case img -->', setup_casepage_img, img_path)

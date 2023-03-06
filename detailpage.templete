@@ -11,22 +11,18 @@
 
     <header class="header">
         <!-- detail name -->
-    
+
         <div id="menu-btn" class="fas fa-bars"></div>
-    
+
     </header>
 
     <section class="home" id="home">
-    
-        <div class="image">
-           <!-- detail image -->
-           
-        </div>
-    
         <div class="content">
             <!-- detail notes -->
 
         </div>
+
+        <!-- detail image -->
     
     </section>
 

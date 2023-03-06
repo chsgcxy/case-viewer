@@ -135,11 +135,13 @@ section:nth-child(even) {
 }
 
 .home {
-    display: flex;
+    display: block;
     align-items: center;
     flex-wrap: wrap;
     gap: 1.5rem;
     padding-top: 10rem;
+    margin: auto;
+    width: 100%;
 }
 
 .home .case {
