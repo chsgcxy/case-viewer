@@ -3,6 +3,7 @@
 import sys
 import os
 import pandas as pd
+import math
 
 def setup_homepage_items(lines:list, args):
     item = args[0]
@@ -81,6 +82,8 @@ def setup_detailpage_excel(lines:list, args):
     for data in data_lines:
         data_string = r'<tr> '
         for ceil in data:
+            if type(ceil) is float and math.isnan(ceil):
+                ceil = '---'
             data_string += r'<td>{}</td> '.format(ceil)
         data_string += r'</tr>'
         lines.append(data_string + '\n')
