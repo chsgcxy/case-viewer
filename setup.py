@@ -65,7 +65,6 @@ def setup_detailpage_excel(lines:list, args):
     excel_path = args[0]
 
     df = pd.read_excel(excel_path, sheet_name=0)
-
     title = list(df.columns)
     lines.append(r'''<h1 class="heading"> {} </h1>'''.format(title[0]) + '\n')
     lines.append(r'''<table class="table">''' + '\n')
@@ -205,14 +204,12 @@ for root, subdirs, casefiles in os.walk(script_dir):
                 init_setup_table('homepage', os.path.join(output_dir, 'homepage'), '<!-- add here -->', setup_homepage_items, dir_name)
 
         # support sheet file
-        setup_sheet = True
         for cf in casefiles:
             suffix = cf.split('.')[-1]
             father_name = os.path.relpath(root, script_dir)
             father_path = os.path.join(output_dir, father_name)
             cf_path = os.path.abspath(os.path.join(root, cf))
-            if setup_sheet and suffix == 'sheet':
-                setup_sheet = False
+            if suffix == 'sheet':
                 init_setup_table('detailpage', father_path, '<!-- detail sheet -->', setup_detailpage_sheet, cf_path)
                 # print('add sheet from:', sheet_path, ' to:', father_path)
             if suffix.upper() in img_types:
@@ -234,12 +231,17 @@ for root, subdirs, casefiles in os.walk(script_dir):
         init_setup_table('casepage', child_path, '<!-- case name -->', setup_casepage_name, child_name)
         init_setup_table('casepage', child_path, '<!-- add css -->', setup_css, css_path)
 
+        setup_case_sheet = True
         for cf in casefiles:
             suffix = cf.split('.')[-1]
+            f_path = os.path.abspath(os.path.join(root, cf))
+            if suffix in excel_types:
+                init_setup_table('casepage', child_path, '<!-- case sheet -->', setup_detailpage_excel, f_path)
+            if suffix == 'sheet':
+                init_setup_table('casepage', child_path, '<!-- case sheet -->', setup_detailpage_sheet, f_path)
+            # add image to one case page
             if suffix.upper() in img_types:
-                # add one case page
-                img_path = os.path.abspath(os.path.join(root, cf))
-                init_setup_table('casepage', child_path, '<!-- case img -->', setup_casepage_img, img_path, cf)
+                init_setup_table('casepage', child_path, '<!-- case img -->', setup_casepage_img, f_path, cf)
 
 # setup page
 for templete in setup_list:
