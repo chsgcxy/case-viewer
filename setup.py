@@ -43,6 +43,7 @@ def setup_detailpage_sheet(lines:list, args):
     with open(sheet_file, 'r') as filp:
         sheet_lines = filp.readlines()
 
+    lines.append(r'''<h1 class="heading"> {} </h1>'''.format(sheet_file))
     lines.append(r'''<table class="table">''' + '\n')
     titles = sheet_lines[0].strip('\n').split('|')
     title_sting = r'<tr>  '
@@ -56,6 +57,36 @@ def setup_detailpage_sheet(lines:list, args):
         data_string = r'<tr> '
         data = data_line.strip('\n').split('|')
         for d in data:
+            data_string += r'<td>{}</td> '.format(d)
+        data_string += r'</tr>'
+        lines.append(data_string + '\n')
+    lines.append(r'''</table>''' + '\n')
+
+def setup_detailpage_csv(lines:list, args):
+    sheet_file = args[0]
+    sheet_lines = []
+    with open(sheet_file, 'r') as filp:
+        sheet_lines = filp.readlines()
+
+    header = sheet_lines[0].split(',')[0]
+    lines.append(r'''<h1 class="heading"> {} </h1>'''.format(header))
+    lines.append(r'''<table class="table">''' + '\n')
+    titles = sheet_lines[1].strip('\n').split(',')
+    title_sting = r'<tr>  '
+    for t in titles:
+        if t == '':
+            t = '---'
+        title_sting += r'<th>{}</th> '.format(t)
+    title_sting += r'</tr>'
+
+    lines.append(title_sting + '\n')
+
+    for data_line in sheet_lines[2:]:
+        data_string = r'<tr> '
+        data = data_line.strip('\n').split(',')
+        for d in data:
+            if d == '':
+                d = '---'
             data_string += r'<td>{}</td> '.format(d)
         data_string += r'</tr>'
         lines.append(data_string + '\n')
@@ -83,7 +114,7 @@ def setup_detailpage_excel(lines:list, args):
         for ceil in data:
             if type(ceil) is float and math.isnan(ceil):
                 ceil = '---'
-            data_string += r'<td>{}</td> '.format(ceil)
+            data_string += r'<td align="left">{}</td> '.format(ceil)
         data_string += r'</tr>'
         lines.append(data_string + '\n')
     lines.append(r'''</table>''' + '\n')
@@ -169,7 +200,7 @@ for root, subdirs, casefiles in os.walk(script_dir):
     # added as dir
     # print('deal with root:', root)
     if len(subdirs) > 0:
-        for subdir in subdirs:
+        for subdir in sorted(subdirs):
             if relpath_header == '.' and subdir in dir_filter:
                 continue
             dir_name = os.path.relpath(os.path.join(root, subdir), script_dir)
@@ -211,7 +242,8 @@ for root, subdirs, casefiles in os.walk(script_dir):
             cf_path = os.path.abspath(os.path.join(root, cf))
             if suffix == 'sheet':
                 init_setup_table('detailpage', father_path, '<!-- detail sheet -->', setup_detailpage_sheet, cf_path)
-                # print('add sheet from:', sheet_path, ' to:', father_path)
+            if suffix.upper() == 'CSV':
+                init_setup_table('detailpage', father_path, '<!-- detail sheet -->', setup_detailpage_csv, cf_path)
             if suffix.upper() in img_types:
                 init_setup_table('detailpage', father_path, '<!-- detail image -->', setup_detailpage_image, cf_path)
                 # print('add title img to:', father_path)
@@ -239,6 +271,8 @@ for root, subdirs, casefiles in os.walk(script_dir):
                 init_setup_table('casepage', child_path, '<!-- case sheet -->', setup_detailpage_excel, f_path)
             if suffix == 'sheet':
                 init_setup_table('casepage', child_path, '<!-- case sheet -->', setup_detailpage_sheet, f_path)
+            if suffix.upper() == 'CSV':
+                init_setup_table('casepage', child_path, '<!-- case sheet -->', setup_detailpage_csv, f_path)
             # add image to one case page
             if suffix.upper() in img_types:
                 init_setup_table('casepage', child_path, '<!-- case img -->', setup_casepage_img, f_path, cf)
